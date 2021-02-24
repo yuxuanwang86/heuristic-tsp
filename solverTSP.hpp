@@ -68,6 +68,7 @@ public:
     void naiveInit();
     void greedyInit();//TODO
 
+    void randomizedConstr();
     void randomizedGreedy();//TODO
     void graspHC(bool swapMoves, bool revMoves, bool insertMoves);//TODO
 

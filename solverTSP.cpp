@@ -4,7 +4,8 @@
 #include <fstream>
 #include <string.h>
 #include <algorithm>
-
+#include <random>
+#include <map>
 #include "solverTSP.hpp"
 
 using namespace std;
@@ -231,10 +232,13 @@ void SolverTSP::greedyInit() {
 	int min_dist;
 	for (int i = 1; i < nbCities; i++) {
 		min_dist = INT_MAX;
+		// TODO do not use distance and find min(distanceMatrix(nbCities*i, nbCities*i+nbCities))
+		// find nearest city
 		for (int j = 0; j < nbCities; j++) {
+			// check if city already in vector
+			if (find(curSol.begin(), curSol.begin() + i, j) != curSol.begin() + i) continue;
 			cur_dist = distance(curSol[i-1], j);
-			auto elem_in = find(curSol.begin(), curSol.begin() + i, j) != curSol.begin() + i;
-			if (min_dist > cur_dist && !elem_in) {
+			if (min_dist > cur_dist) {
 				cur_index = j;
 				min_dist = cur_dist;
 			}
@@ -246,8 +250,62 @@ void SolverTSP::greedyInit() {
 	printStatus();
 }
 
+void SolverTSP::randomizedConstr() {
+	curSol.resize(nbCities+1);
+	random_device rd;
+    mt19937 g(rd());
+	for (int i = 0; i < nbMaxRestart + 1; i++) {
+		curSol.clear();
+		curSol.resize(nbCities+1);
+		for(int i=0; i < nbCities; i++) curSol[i]=i;
+		shuffle(begin(curSol), end(curSol) - 1, g);
+		curSol[nbCities]=0;
+		computeDistanceCost();
+		updateBestSolution();
+		//printStatus();
+	}
+	curSol = bestSolution;
+	currentSolutionCost = bestSolutionCost;
+	printStatus();
+}
+
 void SolverTSP::randomizedGreedy() {
-	//TODO
+	const int n_cities = 3;
+	random_device rd;
+	mt19937 g(rd());
+	uniform_int_distribution<> dis(0, n_cities-1);
+	vector< pair<int, int> > vec_index_dist;
+	
+	int cur_index = 0;
+	int cur_dist;
+	int min_dist;
+	for (int k = 0; k < nbMaxRestart + 1; k++) {
+		curSol.clear();
+		curSol.resize(nbCities+1);
+		curSol[0] = 0;
+		for (int i = 1; i < nbCities; i++) {
+		min_dist = INT_MAX;
+		// TODO do not use distance and find min(distanceMatrix(nbCities*i, nbCities*i+nbCities))
+		// find nearest city
+		for (int j = 0; j < nbCities; j++) {
+			// check if city already in vector
+			if (find(curSol.begin(), curSol.end(), j) != curSol.end()) continue;
+			vec_index_dist.push_back(make_pair(j, distance(curSol[i-1], j)));
+		}
+		sort(vec_index_dist.begin(), vec_index_dist.end(), [](auto &left, auto &right) { return left.second < right.second; });
+		// for(auto& e: vec_index_dist) cout<<e.first<<'-'<<e.second<<' ';
+		// cout<<vec_index_dist.size()<<endl;
+		size_t rand_index = dis(g);
+		curSol[i] = vec_index_dist[min(vec_index_dist.size()-1, rand_index)].first;
+		vec_index_dist.clear();
+		}
+		updateBestSolution();
+	}
+	curSol[nbCities]=0;
+	curSol = bestSolution;
+	currentSolutionCost = bestSolutionCost;
+	computeDistanceCost();
+	printStatus();
 }
 
 void SolverTSP::graspHC(bool swapMoves, bool revMoves, bool insertMoves) {

@@ -22,6 +22,8 @@ int main(int argc, char** argv) {
     tsp.displayInstance();
     //tsp.naiveInit();
     tsp.greedyInit();
+    //tsp.randomizedConstr();
+    tsp.randomizedGreedy();
     //tsp.hillClimbing(true,true,true);
 
     return 0;
