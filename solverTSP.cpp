@@ -85,42 +85,6 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	int temp = 0;
 
 	if (swapMoves){
-
-/*
-		temp = distance(curSol[nbCities-2],curSol[nbCities-1]) + distance(curSol[nbCities-1],curSol[0]) +  distance(curSol[0],curSol[1]) - distance(curSol[nbCities-2],curSol[0])  -  distance(curSol[0],curSol[nbCities-1]) -  distance(curSol[nbCities-1],curSol[1]);
-		if (delta < temp ){
-			delta=temp;
-			param1 = 0;
-			param2 = nbCities-1;
-			modeImpr=1;
-		}
-
-		for(i1=1; i1 < nbCities-2 ; i1++){
-			i2=i1+1;
-			temp = distance(curSol[i1-1],curSol[i1])  +  distance(curSol[i1],curSol[i2])  +  distance(curSol[i2],curSol[i2+1]) - distance(curSol[i1-1],curSol[i2]) -  distance(curSol[i1],curSol[i2+1]) -  distance(curSol[i2],curSol[i1]) ;
-			if (delta < temp ){
-				delta=temp;
-				param1 = i1;
-				param2 = i2;
-				modeImpr=1;
-
-			}
-		}
-
-		for(i1=1; i1 < nbCities-1 ; i1++){
-			for(i2=i1+2; i2 < nbCities ; i2++){
-				temp = distance(curSol[i1-1],curSol[i1]) + distance(curSol[i1],curSol[i1+1]) +  distance(curSol[i2-1],curSol[i2])+  distance(curSol[i2],curSol[i2+1]) - distance(curSol[i1-1],curSol[i2]) - distance(curSol[i2],curSol[i1+1]) -  distance(curSol[i1],curSol[i2+1]) -  distance(curSol[i2-1],curSol[i1]);
-				if (delta < temp ){
-					delta=temp;
-					param1 = i1;
-					param2 = i2;
-					modeImpr=1;
-				}
-
-			}
-		}*/
-
-
 		temp = distSol(nbCities-2,nbCities-1) + distSol(nbCities-1,0) +  distSol(0,1) 
 					   	- distSol(nbCities-2,0) - distSol(0,nbCities-1) - distSol(nbCities-1,1);
 		if (delta < temp ){
@@ -141,23 +105,18 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 
 			}
 		}
-
-
 		for(i1=1; i1 < nbCities-1 ; i1++){
 			for(i2=i1+2; i2 < nbCities ; i2++){
-				temp = distSol(i1-1,i1) + distSol(i1,i1+1) +  distSol(i2-1,i2)+  distSol(i2,i2+1) - distSol(i1-1,i2) - distSol(i2,i1+1) -  distSol(i1,i2+1) -  distSol(i2-1,i1);
+				temp = distSol(i1-1,i1) + distSol(i1,i1+1) +  distSol(i2-1,i2)+ distSol(i2,i2+1) - distSol(i1-1,i2) - distSol(i2,i1+1) -  distSol(i1,i2+1) -  distSol(i2-1,i1);
 				if (delta < temp ){
 					delta=temp;
 					param1 = i1;
 					param2 = i2;
 					modeImpr=1;
 				}
-
 			}
 		}
-
 		i1=0;
-
 		for(i2=2; i2 < nbCities-1 ; i2++){
 			temp = distSol(nbCities-1,i1) + distSol(i1,i1+1) +  distSol(i2-1,i2)+  distSol(i2,i2+1) - distSol(nbCities-1,i2) - distSol(i2,i1+1) -  distSol(i1,i2+1) -  distSol(i2-1,i1);
 			if (delta < temp ){
@@ -166,17 +125,20 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 				param2 = i2;
 				modeImpr=1;
 			}
-
 		}
-
-
-
 	}
 	if (revMoves){
 		//TODO
 	}
 	if (insertMoves){
-		//TODO
+		temp = distSol(nbCities-2,nbCities-1) + distSol(nbCities-1,0) +  distSol(0,1) 
+					   	- distSol(nbCities-2,0) - distSol(0,nbCities-1) - distSol(nbCities-1,1);
+		if (delta < temp ){
+			delta=temp;
+			param1 = 0;
+			param2 = nbCities-1;
+			modeImpr=1;
+		}
 	}
 
 	if (verboseMode) {
@@ -184,7 +146,7 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	}
 
 
-	currentSolutionCost-=delta;
+	currentSolutionCost -= delta;
 	if (modeImpr==1){
 		temp = curSol[param2];
 		curSol[param2]=curSol[param1];
@@ -193,11 +155,13 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	}
 
 	if (modeImpr==2){
-		//TODO
+		
 	}
 
 	if (modeImpr==3){
-		//TODO
+		curSol.insert(curSol.begin() + i2 + 1, curSol[i1]);
+		curSol.erase(curSol.begin() + i1);
+		curSol.resize(nbCities+1);
 	}
 
 	if (verboseMode) {	printStatus();	}
@@ -213,7 +177,6 @@ void SolverTSP::hillClimbing(bool swapMoves, bool revMoves, bool insertMoves) {
 	while(improving && nbIterLS< nbMaxIterLS){
 		improving = hillClimbingIter(swapMoves, revMoves, insertMoves);
 		nbIterLS++;
-
 	}
 
 }
@@ -259,7 +222,7 @@ void SolverTSP::randomizedConstr() {
 		curSol.resize(nbCities+1);
 		for(int i=0; i < nbCities; i++) curSol[i]=i;
 		shuffle(begin(curSol), end(curSol) - 1, g);
-		curSol[nbCities]=0;
+		curSol[nbCities] = curSol[0];
 		computeDistanceCost();
 		updateBestSolution();
 		// printStatus();
@@ -299,11 +262,11 @@ void SolverTSP::randomizedGreedy() {
 		curSol[i] = vec_index_dist[rand_index].first;
 		vec_index_dist.clear();
 		}
+		curSol[nbCities]=0;
 		computeDistanceCost();
-		printStatus();
+		// printStatus();
 		updateBestSolution();
 	}
-	curSol[nbCities]=0;
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
 	computeDistanceCost();
