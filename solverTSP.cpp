@@ -121,7 +121,8 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 		}*/
 
 
-		temp = distSol(nbCities-2,nbCities-1) + distSol(nbCities-1,0) +  distSol(0,1) - distSol(nbCities-2,0) - distSol(0,nbCities-1) - distSol(nbCities-1,1);
+		temp = distSol(nbCities-2,nbCities-1) + distSol(nbCities-1,0) +  distSol(0,1) 
+					   	- distSol(nbCities-2,0) - distSol(0,nbCities-1) - distSol(nbCities-1,1);
 		if (delta < temp ){
 			delta=temp;
 			param1 = 0;
@@ -232,7 +233,6 @@ void SolverTSP::greedyInit() {
 	int min_dist;
 	for (int i = 1; i < nbCities; i++) {
 		min_dist = INT_MAX;
-		// TODO do not use distance and find min(distanceMatrix(nbCities*i, nbCities*i+nbCities))
 		// find nearest city
 		for (int j = 0; j < nbCities; j++) {
 			// check if city already in vector
@@ -273,6 +273,7 @@ void SolverTSP::randomizedGreedy() {
 	const int n_cities = 3;
 	random_device rd;
 	mt19937 g(rd());
+	uniform_int_distribution<> dis(0, n_cities - 1);
 	vector< pair<int, int> > vec_index_dist;
 	
 	int cur_index = 0;
@@ -285,7 +286,6 @@ void SolverTSP::randomizedGreedy() {
 		curSol[0] = 0;
 		for (int i = 1; i < nbCities; i++) {
 		min_dist = INT_MAX;
-		// TODO do not use distance and find min(distanceMatrix(nbCities*i, nbCities*i+nbCities))
 		// find nearest city
 		for (int j = 0; j < nbCities; j++) {
 			// check if city already in vector
@@ -295,9 +295,7 @@ void SolverTSP::randomizedGreedy() {
 		sort(vec_index_dist.begin(), vec_index_dist.end(), [](auto &left, auto &right) { return left.second < right.second; });
 		// for(auto& e: vec_index_dist) cout<<e.first<<'-'<<e.second<<' ';
 		// cout<<vec_index_dist.size()<<endl;
-		rand_bound = vec_index_dist.size() - 1 < n_cities - 1 ? vec_index_dist.size() - 1 : n_cities - 1;
-		uniform_int_distribution<> dis(0, rand_bound);
-		size_t rand_index = dis(g);
+		size_t rand_index = vec_index_dist.size() < n_cities ? 0 : dis(g);
 		curSol[i] = vec_index_dist[rand_index].first;
 		vec_index_dist.clear();
 		}
