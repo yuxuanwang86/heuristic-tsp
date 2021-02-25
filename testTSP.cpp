@@ -19,8 +19,8 @@ int main(int argc, char** argv) {
 	tsp.setLSparameters(2,1);
 
     tsp.readInstanceFromFile(instanceFile);
-    tsp.displayInstance();
-    tsp.naiveInit();
+    //tsp.displayInstance();
+    //tsp.naiveInit();
     tsp.greedyInit();
     tsp.randomizedConstr();
     tsp.randomizedGreedy();

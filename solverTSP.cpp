@@ -59,9 +59,10 @@ bool SolverTSP::checkFeasibility() {
 	bool b=true;
 	int it=0;
 	while (b && it< nbCities){
+		b = (copyCurrentSol[it]==it);
 		it++;
-		b= (copyCurrentSol[it]==it);
 	}
+	// cout<<endl;
 	if (!b) cout << "Warning: infeasible solution found" << endl;
 	return b;
 }
@@ -210,7 +211,8 @@ void SolverTSP::greedyInit() {
 	}
 	curSol[nbCities]=0;
 	computeDistanceCost();
-	printStatus();
+	if (checkFeasibility())
+		printStatus();
 }
 
 void SolverTSP::randomizedConstr() {
@@ -229,7 +231,8 @@ void SolverTSP::randomizedConstr() {
 	}
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
-	printStatus();
+	if (checkFeasibility())
+		printStatus();
 }
 
 void SolverTSP::randomizedGreedy() {
@@ -270,7 +273,8 @@ void SolverTSP::randomizedGreedy() {
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
 	computeDistanceCost();
-	printStatus();
+	if (checkFeasibility())
+		printStatus();
 }
 
 void SolverTSP::graspHC(bool swapMoves, bool revMoves, bool insertMoves) {
@@ -290,7 +294,7 @@ void SolverTSP::updateBestSolution() {
 void SolverTSP::printStatus() {
 	cout << "current solution with cost " << currentSolutionCost << endl;
 
-	for(int i=0; i < nbCities; i++){
+	for(int i=0; i <nbCities; i++){
 		cout << " " << curSol[i];
 	}
 	cout << endl;
