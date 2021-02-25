@@ -54,7 +54,7 @@ public:
 
     void updateBestSolution();
     void computeDistanceCost();
-
+    int getCurrentSolutionCost(){ return currentSolutionCost;};
 
 
     void setLSparameters(int nbIter, int nbRestart){nbMaxIterLS = nbIter; nbMaxRestart= nbRestart;};
