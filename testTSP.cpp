@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     tsp.readInstanceFromFile(instanceFile);
     tsp.displayInstance();
     //tsp.naiveInit();
-    tsp.greedyInit();
+    // tsp.greedyInit();
     //tsp.randomizedConstr();
     tsp.randomizedGreedy();
     //tsp.hillClimbing(true,true,true);

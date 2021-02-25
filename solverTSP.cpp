@@ -262,7 +262,7 @@ void SolverTSP::randomizedConstr() {
 		curSol[nbCities]=0;
 		computeDistanceCost();
 		updateBestSolution();
-		//printStatus();
+		// printStatus();
 	}
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
@@ -273,12 +273,12 @@ void SolverTSP::randomizedGreedy() {
 	const int n_cities = 3;
 	random_device rd;
 	mt19937 g(rd());
-	uniform_int_distribution<> dis(0, n_cities-1);
 	vector< pair<int, int> > vec_index_dist;
 	
 	int cur_index = 0;
 	int cur_dist;
 	int min_dist;
+	int rand_bound;
 	for (int k = 0; k < nbMaxRestart + 1; k++) {
 		curSol.clear();
 		curSol.resize(nbCities+1);
@@ -295,10 +295,14 @@ void SolverTSP::randomizedGreedy() {
 		sort(vec_index_dist.begin(), vec_index_dist.end(), [](auto &left, auto &right) { return left.second < right.second; });
 		// for(auto& e: vec_index_dist) cout<<e.first<<'-'<<e.second<<' ';
 		// cout<<vec_index_dist.size()<<endl;
+		rand_bound = vec_index_dist.size() - 1 < n_cities - 1 ? vec_index_dist.size() - 1 : n_cities - 1;
+		uniform_int_distribution<> dis(0, rand_bound);
 		size_t rand_index = dis(g);
-		curSol[i] = vec_index_dist[min(vec_index_dist.size()-1, rand_index)].first;
+		curSol[i] = vec_index_dist[rand_index].first;
 		vec_index_dist.clear();
 		}
+		computeDistanceCost();
+		printStatus();
 		updateBestSolution();
 	}
 	curSol[nbCities]=0;
