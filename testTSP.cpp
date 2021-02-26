@@ -16,15 +16,15 @@ int main(int argc, char** argv) {
 
     SolverTSP tsp;
     tsp.setVerboseMode(true);
-	tsp.setLSparameters(2,1);
+	tsp.setLSparameters(20,1);
 
     tsp.readInstanceFromFile(instanceFile);
     //tsp.displayInstance();
     //tsp.naiveInit();
-    tsp.greedyInit();
-    tsp.randomizedConstr();
+    //tsp.greedyInit();
+    //tsp.randomizedConstr();
     tsp.randomizedGreedy();
-    //tsp.hillClimbing(false,false,true);
+    tsp.hillClimbing(false,false,true);
 
     // vector<int> vec;
     // for(int i = 1; i <= 10; i++) vec.push_back(i);

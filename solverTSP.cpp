@@ -60,6 +60,7 @@ bool SolverTSP::checkFeasibility() {
 	int it=0;
 	while (b && it< nbCities){
 		b = (copyCurrentSol[it]==it);
+		// cout<<copyCurrentSol[it]<<endl;
 		it++;
 	}
 	// cout<<endl;
@@ -103,7 +104,6 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 				param1 = i1;
 				param2 = i2;
 				modeImpr=1;
-
 			}
 		}
 		for(i1=1; i1 < nbCities-1 ; i1++){
@@ -132,14 +132,35 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 		//TODO
 	}
 	if (insertMoves){
-		temp = distSol(nbCities-2,nbCities-1) + distSol(nbCities-1,0) +  distSol(0,1) 
-					   	- distSol(nbCities-2,0) - distSol(0,nbCities-1) - distSol(nbCities-1,1);
-		if (delta < temp ){
-			delta=temp;
-			param1 = 0;
-			param2 = nbCities-1;
-			modeImpr=1;
+		// insert last to first or first to last does not change anything
+		// insert to i1 + 1 same as swap
+
+		// insert to i1 + 2...
+		for(i1=1; i1 < nbCities-1 ; i1++){
+			for(i2=i1+2; i2 < nbCities ; i2++) {
+				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2, i2 + 1) - distSol(i2, i1) - distSol(i1, i2 + 1) - distSol(i1-1, i1+1);
+				if (delta < temp ){
+					cout<<temp<<' '<<i1<<' '<<i2<<" |";
+					delta=temp;
+					param1 = i1;
+					param2 = i2;
+					modeImpr = 3;
+				}
+			}
 		}
+		// i1 = 0
+		i1 = 0;
+		for(i2 = 2; i2 < nbCities-1; i2++){
+			temp = distSol(i1, i1+1) + distSol(nbCities-1, nbCities) + distSol(i2, i2 + 1) - distSol(i2, i1) - distSol(i1, i2+1) - distSol(nbCities-1, 1);
+			if (delta < temp) {
+				// cout<<temp<<' '<<i1<<' '<<i2<<" |";
+				delta=temp;
+				param1 = i1;
+				param2 = i2;
+				modeImpr = 3;
+			}
+		}
+
 	}
 
 	if (verboseMode) {
@@ -160,9 +181,23 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	}
 
 	if (modeImpr==3){
-		curSol.insert(curSol.begin() + i2 + 1, curSol[i1]);
-		curSol.erase(curSol.begin() + i1);
-		curSol.resize(nbCities+1);
+		if (param2 == param1 + 1) {
+			temp = curSol[param2];
+			curSol[param2]=curSol[param1];
+			curSol[param1]=temp;
+		}
+		else {
+			//cout<<"-------------------------"<<endl;
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl<<"insert: ";
+			curSol.insert(curSol.begin() + param2 + 1, curSol[param1]);
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl<<"erase: ";
+			curSol.erase(curSol.begin() + param1);
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl;
+		}
+		curSol[nbCities] = curSol[0];
 	}
 
 	if (verboseMode) {	printStatus();	}
@@ -231,8 +266,8 @@ void SolverTSP::randomizedConstr() {
 	}
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
-	if (checkFeasibility())
-		printStatus();
+	// if (checkFeasibility())
+		//printStatus();
 }
 
 void SolverTSP::randomizedGreedy() {
