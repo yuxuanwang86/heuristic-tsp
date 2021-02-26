@@ -20,8 +20,10 @@ private:
 
     //related to the solution of instance
 
-    vector<int>  curSol;
+    vector<int> curSol;
+    vector<int> revSol;
 	int currentSolutionCost;
+    int revSolutionCost;
 
     vector<int>  bestSolution;
 	int bestSolutionCost;
@@ -46,7 +48,8 @@ private:
 
     bool hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves);//TODO
 
-
+    void computeReversedDistanceCost();
+    void reverseCities(const int& c1, const int& c2);
 
 public:
 
@@ -54,7 +57,7 @@ public:
 
     void updateBestSolution();
     void computeDistanceCost();
-    int getCurrentSolutionCost(){ return currentSolutionCost;};
+    int getCurrentSolutionCost() { return currentSolutionCost; };
 
 
     void setLSparameters(int nbIter, int nbRestart){nbMaxIterLS = nbIter; nbMaxRestart= nbRestart;};
@@ -66,10 +69,10 @@ public:
     void hillClimbing(bool swapMoves, bool revMoves, bool insertMoves);
 
     void naiveInit();
-    void greedyInit();//TODO
+    void greedyInit();
 
     void randomizedConstr();
-    void randomizedGreedy();//TODO
+    void randomizedGreedy();
     void graspHC(bool swapMoves, bool revMoves, bool insertMoves);//TODO
 
     void simulatedAnnealing();//TODO

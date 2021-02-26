@@ -69,12 +69,22 @@ bool SolverTSP::checkFeasibility() {
 }
 
 void SolverTSP::computeDistanceCost() {
-	currentSolutionCost=distance(curSol[nbCities-1],curSol[0]);
-	for(int i=0; i < nbCities-1; i++) currentSolutionCost+=distance(curSol[i],curSol[i+1]);
+	currentSolutionCost = distance(curSol[nbCities-1], curSol[0]);
+	for(int i=0; i < nbCities-1; i++) currentSolutionCost += distance(curSol[i],curSol[i+1]);
 }
 
+void SolverTSP::computeReversedDistanceCost() {
+	revSolutionCost = 0;
+	for(int i = 0; i < revSol.size() - 1; i++) revSolutionCost += distance(revSol[i],revSol[i+1]);
+}
 
-
+void SolverTSP::reverseCities(const int& c1, const int& c2) {
+	vector<int>::iterator it1, it2;
+    it1 = revSol.begin() + c1;
+    it2 = revSol.begin() + c2;
+    reverse(it1, it2);
+	computeReversedDistanceCost();
+}
 
 bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves) {
 
@@ -129,14 +139,20 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 		}
 	}
 	if (revMoves){
-		//TODO
+		// i2 == i1 + 1 same as insert
+		// i2 == i1 + 2 same as swap
+		// i2 == i1 + 3 ...
+		i1 = 0;
+		for (i2 = i1 + 3; i2 < nbCities - 1; i2 ++) {
+
+		}
 	}
 	if (insertMoves){
 		// insert last to first or first to last does not change anything
 		// insert to i1 + 1 same as swap
 
 		// insert to i1 + 2...
-		for(i1=1; i1 < nbCities-1 ; i1++){
+		for(i1=1; i1 < nbCities-1 ; i1++) {
 			for(i2=i1+2; i2 < nbCities ; i2++) {
 				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2, i2 + 1) - distSol(i2, i1) - distSol(i1, i2 + 1) - distSol(i1-1, i1+1);
 				if (delta < temp ){
@@ -148,7 +164,6 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 				}
 			}
 		}
-		// i1 = 0
 		i1 = 0;
 		for(i2 = 2; i2 < nbCities-1; i2++){
 			temp = distSol(i1, i1+1) + distSol(nbCities-1, nbCities) + distSol(i2, i2 + 1) - distSol(i2, i1) - distSol(i1, i2+1) - distSol(nbCities-1, 1);
@@ -158,6 +173,19 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 				param1 = i1;
 				param2 = i2;
 				modeImpr = 3;
+			}
+		}
+
+		for(i1 = nbCities - 1; i1 > 1 ; i1--) {
+			for(i2 = i1 - 2; i2 > 0 ; i2--) {
+				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2 - 1, i2) - distSol(i2-1, i1) - distSol(i2, i1) - distSol(i1-1, i1+1);
+				if (delta < temp ){
+					cout<<temp<<' '<<i1<<' '<<i2<<" |";
+					delta=temp;
+					param1 = i1;
+					param2 = i2;
+					modeImpr = 3;
+				}
 			}
 		}
 
@@ -181,10 +209,16 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	}
 
 	if (modeImpr==3){
-		if (param2 == param1 + 1) {
-			temp = curSol[param2];
-			curSol[param2]=curSol[param1];
-			curSol[param1]=temp;
+		if (param1 > param2) {
+			//cout<<"-------------------------"<<endl;
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl<<"insert: ";
+			curSol.insert(curSol.begin() + param2, curSol[param1]);
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl<<"erase: ";
+			curSol.erase(curSol.begin() + param1 + 1);
+			//for(auto& e: curSol) cout<<e<<' ';
+			//cout<<endl;
 		}
 		else {
 			//cout<<"-------------------------"<<endl;
@@ -200,7 +234,7 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 		curSol[nbCities] = curSol[0];
 	}
 
-	if (verboseMode) {	printStatus();	}
+	if (verboseMode) printStatus();
 
 
 	return delta>0;
