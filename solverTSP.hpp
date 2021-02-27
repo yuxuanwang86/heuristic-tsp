@@ -74,7 +74,8 @@ public:
 
     void randomizedConstr();
     void randomizedGreedy();
-    void graspHC(bool swapMoves, bool revMoves, bool insertMoves);//TODO
+    void graspHC(bool swapMoves, bool revMoves, bool insertMoves);
+    void ilsHC(bool swapMoves, bool revMoves, bool insertMoves);
 
     void simulatedAnnealing();//TODO
 

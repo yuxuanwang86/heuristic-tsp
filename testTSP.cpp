@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
     SolverTSP tsp;
     tsp.setVerboseMode(true);
-	tsp.setLSparameters(50,1);
+	tsp.setLSparameters(20,1);
 
     tsp.readInstanceFromFile(instanceFile);
     //tsp.displayInstance();
@@ -24,7 +24,8 @@ int main(int argc, char** argv) {
     //tsp.greedyInit();
     tsp.randomizedConstr();
     //tsp.randomizedGreedy();
-    tsp.hillClimbing(true,true,true);
+    //tsp.hillClimbing(false,false,true);
+    tsp.simulatedAnnealing();
 
     // vector<int> vec;
     // for(int i = 0; i < 10; i++) vec.push_back(i);

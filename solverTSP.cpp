@@ -189,7 +189,7 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 			for(i2=i1+2; i2 < nbCities ; i2++) {
 				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2, i2 + 1) - distSol(i2, i1) - distSol(i1, i2 + 1) - distSol(i1-1, i1+1);
 				if (delta < temp ){
-					cout<<temp<<' '<<i1<<' '<<i2<<" |";
+					//cout<<temp<<' '<<i1<<' '<<i2<<" |";
 					delta=temp;
 					param1 = i1;
 					param2 = i2;
@@ -209,16 +209,28 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 			}
 		}
 
-		for(i1 = nbCities - 1; i1 > 1 ; i1--) {
+		for(i1 = nbCities - 1; i1 > 2 ; i1--) {
 			for(i2 = i1 - 2; i2 > 0 ; i2--) {
-				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2 - 1, i2) - distSol(i2-1, i1) - distSol(i2, i1) - distSol(i1-1, i1+1);
+				temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(i2 - 1, i2) - distSol(i2-1, i1) - distSol(i1, i2) - distSol(i1-1, i1+1);
 				if (delta < temp ){
-					cout<<temp<<' '<<i1<<' '<<i2<<" |";
+					// cout<<temp<<' '<<i1<<' '<<i2<<" |";
 					delta=temp;
 					param1 = i1;
 					param2 = i2;
 					modeImpr = 3;
 				}
+			}
+		}
+
+		i2 = 0;
+		for (i1 = nbCities - 1; i1 > 1; i1--) {
+			temp = distSol(i1-1, i1) + distSol(i1, i1+1) + distSol(nbCities-1, nbCities) - distSol(i1, i2) - distSol(nbCities-1, i1) - distSol(i1-1, i1+1);
+			if (delta < temp ){
+				// cout<<temp<<' '<<i1<<' '<<i2<<" |";
+				delta=temp;
+				param1 = i1;
+				param2 = i2;
+				modeImpr = 3;
 			}
 		}
 
@@ -271,7 +283,7 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	if (verboseMode) printStatus();
 
 
-	return delta>0;
+	return delta > 0;
 }
 
 void SolverTSP::hillClimbing(bool swapMoves, bool revMoves, bool insertMoves) {
@@ -314,15 +326,13 @@ void SolverTSP::greedyInit() {
 	}
 	curSol[nbCities]=0;
 	computeDistanceCost();
-	if (checkFeasibility())
-		printStatus();
 }
 
 void SolverTSP::randomizedConstr() {
 	curSol.resize(nbCities+1);
 	random_device rd;
     mt19937 g(rd());
-	for (int i = 0; i < nbMaxRestart + 1; i++) {
+	// for (int i = 0; i < nbMaxRestart + 1; i++) {
 		curSol.clear();
 		curSol.resize(nbCities+1);
 		for(int i=0; i < nbCities; i++) curSol[i]=i;
@@ -330,12 +340,10 @@ void SolverTSP::randomizedConstr() {
 		curSol[nbCities] = curSol[0];
 		computeDistanceCost();
 		updateBestSolution();
-		// printStatus();
-	}
-	curSol = bestSolution;
-	currentSolutionCost = bestSolutionCost;
-	// if (checkFeasibility())
-		//printStatus();
+	// }
+	// curSol = bestSolution;
+	// currentSolutionCost = bestSolutionCost;
+	// computeDistanceCost();
 }
 
 void SolverTSP::randomizedGreedy() {
@@ -362,27 +370,33 @@ void SolverTSP::randomizedGreedy() {
 			vec_index_dist.push_back(make_pair(j, distance(curSol[i-1], j)));
 		}
 		sort(vec_index_dist.begin(), vec_index_dist.end(), [](auto &left, auto &right) { return left.second < right.second; });
-		// for(auto& e: vec_index_dist) cout<<e.first<<'-'<<e.second<<' ';
-		// cout<<vec_index_dist.size()<<endl;
 		size_t rand_index = vec_index_dist.size() < n_cities ? 0 : dis(g);
 		curSol[i] = vec_index_dist[rand_index].first;
 		vec_index_dist.clear();
 		}
 		curSol[nbCities]=0;
 		computeDistanceCost();
-		// printStatus();
 		updateBestSolution();
 	}
 	curSol = bestSolution;
 	currentSolutionCost = bestSolutionCost;
 	computeDistanceCost();
-	if (checkFeasibility())
-		printStatus();
 }
 
 void SolverTSP::graspHC(bool swapMoves, bool revMoves, bool insertMoves) {
-	//TODO
+	for (int i = 0; i < nbMaxRestart + 1; i++) {
+		greedyInit();
+		hillClimbing(swapMoves, revMoves, insertMoves);
+		updateBestSolution();
+	}
+}
 
+void SolverTSP::ilsHC(bool swapMoves, bool revMoves, bool insertMoves) {
+	for (int i = 0; i < nbMaxRestart + 1; i++) {
+		randomizedConstr();
+		hillClimbing(swapMoves, revMoves, insertMoves);
+		updateBestSolution();
+	}
 }
 
 void SolverTSP::updateBestSolution() {
@@ -415,7 +429,43 @@ void SolverTSP ::displayInstance() {
 }
 
 void SolverTSP::simulatedAnnealing() {
-	//TODO
+	auto t_start = 50000.0;
+	auto t_end = 1e-8;
+	auto q = 0.8;
+	random_device rd;
+	mt19937 g(rd());
+	uniform_int_distribution<> dis_int(0, 2);
+	uniform_real_distribution<double> dis_real(0.0,1.0);
+	int mode;
+	bool swapMoves = false, insertMoves = false, revMoves = false;
+	while (t_start > t_end) {
+		for (int i = 0; i < nbMaxRestart; i++) {
+			vector<int> tmpSol = curSol;
+			int tmpSolutionCost = distance(tmpSol[nbCities-1], tmpSol[0]);
+			for(int i = 0; i < nbCities-1; i++) tmpSolutionCost += distance(tmpSol[i],tmpSol[i+1]);
+			mode = dis_int(g);
+			switch (mode) {
+				case 0:
+					swapMoves = true; 
+					break;
+				case 1:
+					revMoves = true;
+					break;
+				case 2:
+					insertMoves = true;
+					break;
+				default:
+					break;
+			}
+			if (!hillClimbingIter(swapMoves, revMoves, insertMoves)) {
+				if (exp((tmpSolutionCost-currentSolutionCost) / t_start) <= dis_real(g)) {
+					curSol = tmpSol;
+					computeDistanceCost();
+				} else updateBestSolution();
+			} else updateBestSolution();
+		}
+		t_start *= q;
+	}
 }
 
 
