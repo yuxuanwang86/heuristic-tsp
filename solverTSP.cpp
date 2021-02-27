@@ -75,19 +75,19 @@ void SolverTSP::computeDistanceCost() {
 
 void SolverTSP::computeReversedDistanceCost() {
 	revSolutionCost = 0;
+	subSolutionCost = 0;
 	for(int i = 0; i < revSol.size() - 1; i++) revSolutionCost += distance(revSol[i],revSol[i+1]);
+	for(int i = revSol.size() - 1; i >= 1; i--) {
+		subSolutionCost += distance(revSol[i],revSol[i-1]);
+	}
 }
 
-void SolverTSP::reverseCities(const int& c1, const int& c2) {
-	vector<int>::iterator it1, it2;
-    it1 = revSol.begin() + c1;
-    it2 = revSol.begin() + c2;
-    reverse(it1, it2);
+void SolverTSP::reverseCities() {
+    reverse(revSol.begin(), revSol.end());
 	computeReversedDistanceCost();
 }
 
 bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves) {
-
 
 	int modeImpr = -1 ; // pour dire quel voisinage a ameliore
 	int param1 = -1;
@@ -138,14 +138,47 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 			}
 		}
 	}
-	if (revMoves){
-		// i2 == i1 + 1 same as insert
+	if (revMoves) {
+		// i2 == i1 + 1 same as insert and swap
 		// i2 == i1 + 2 same as swap
 		// i2 == i1 + 3 ...
+		vector<int>::const_iterator first, last;
 		i1 = 0;
-		for (i2 = i1 + 3; i2 < nbCities - 1; i2 ++) {
-
+		for (i2 = i1 + 3; i2 < nbCities; i2 ++) {
+			first = curSol.begin();
+			last = curSol.begin() + i2 + 1;
+			revSol.resize(i2 - i1 + 1);
+			revSol.assign(first, last);
+			reverseCities();
+			temp = subSolutionCost + distSol(i2, i2+1) + distSol(nbCities-1, nbCities) - revSolutionCost
+				    - distSol(i1, i2 + 1) - (i2 == nbCities - 1 ? distSol(i1, i2) : distSol(nbCities-1, i2));
+			if (delta < temp ) {
+				delta = temp;
+				param1 = i1;
+				param2 = i2;
+				modeImpr = 2;
+			}
 		}
+
+		for(i1 = 1; i1 < nbCities - 4; i1++) {
+			for (i2 = i1 + 3; i2 < nbCities; i2++) {
+				first = curSol.begin() + i1;
+				last = curSol.begin() + i2 + 1;
+				revSol.resize(i2 - i1 + 1);
+				revSol.assign(first, last);
+				reverseCities();
+				temp = subSolutionCost + distSol(i1-1, i1) + distSol(i2, i2 + 1) - revSolutionCost
+						- distSol(i1-1, i2) - distSol(i1, i2 + 1);
+				if (delta < temp ) {
+					delta = temp;
+					param1 = i1;
+					param2 = i2;
+					modeImpr = 2;
+				}
+			}
+		}
+
+
 	}
 	if (insertMoves){
 		// insert last to first or first to last does not change anything
@@ -205,7 +238,8 @@ bool SolverTSP::hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves
 	}
 
 	if (modeImpr==2){
-		
+		reverse(curSol.begin() + param1, curSol.begin() + param2 + 1);
+		curSol[nbCities] = curSol[0];
 	}
 
 	if (modeImpr==3){

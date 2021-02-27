@@ -24,6 +24,7 @@ private:
     vector<int> revSol;
 	int currentSolutionCost;
     int revSolutionCost;
+    int subSolutionCost;
 
     vector<int>  bestSolution;
 	int bestSolutionCost;
@@ -49,7 +50,7 @@ private:
     bool hillClimbingIter(bool swapMoves, bool revMoves, bool insertMoves);//TODO
 
     void computeReversedDistanceCost();
-    void reverseCities(const int& c1, const int& c2);
+    void reverseCities();
 
 public:
 
