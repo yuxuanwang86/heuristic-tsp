@@ -441,9 +441,9 @@ void SolverTSP::simulatedAnnealing() {
 	while (t_start > t_end) {
 		for (int i = 0; i < nbMaxRestart; i++) {
 			vector<int> tmpSol = curSol;
-			int tmpSolutionCost = distance(tmpSol[nbCities-1], tmpSol[0]);
+			int tmpSolutionCost = distance(tmpSol[nbCities-1], tmpSol[0]);//current solution
 			for(int i = 0; i < nbCities-1; i++) tmpSolutionCost += distance(tmpSol[i],tmpSol[i+1]);
-			mode = dis_int(g);
+			mode = dis_int(g); // get a int between (0,2) 0,1,2
 			switch (mode) {
 				case 0:
 					swapMoves = true; 
@@ -457,7 +457,7 @@ void SolverTSP::simulatedAnnealing() {
 				default:
 					break;
 			}
-			if (!hillClimbingIter(swapMoves, revMoves, insertMoves)) {
+			if (!hillClimbingIter(swapMoves, revMoves, insertMoves)) { //if there's an improvement
 				if (exp((tmpSolutionCost-currentSolutionCost) / t_start) <= dis_real(g)) {
 					curSol = tmpSol;
 					computeDistanceCost();
