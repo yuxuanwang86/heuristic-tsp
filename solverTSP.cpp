@@ -457,7 +457,7 @@ void SolverTSP::simulatedAnnealing() {
 				default:
 					break;
 			}
-			if (!hillClimbingIter(swapMoves, revMoves, insertMoves)) { //if there's an improvement
+			if (!hillClimbingIter(swapMoves, revMoves, insertMoves)) { //if there is not an improvement
 				if (exp((tmpSolutionCost-currentSolutionCost) / t_start) <= dis_real(g)) {
 					curSol = tmpSol;
 					computeDistanceCost();
